@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+  <title>Prompt Injection Detector</title>
+</head>
+<body>
+  <div class="popup-container">
+    <header class="header">
+      <div class="header-icon">
+        <img src="../icons/icon-32.png" alt="" width="24" height="24">
+      </div>
+      <h1 class="header-title">Prompt Injection Detector</h1>
+    </header>
+
+    <div id="status" class="status status-clean">
+      <div class="status-icon" id="status-icon"></div>
+      <div class="status-text">
+        <div class="status-level" id="status-level">Scanning...</div>
+        <div class="status-detail" id="status-detail"></div>
+      </div>
+    </div>
+
+    <div id="controls" class="controls" style="display:none">
+      <label class="toggle">
+        <input type="checkbox" id="toggle-highlights" checked>
+        <span class="toggle-label">Show highlights</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="toggle-ai-warning">
+        <span class="toggle-label">AI agent warning</span>
+      </label>
+      <button id="rescan-btn" class="btn btn-secondary" title="Re-scan page">Re-scan</button>
+    </div>
+
+    <div id="findings-container" class="findings-container"></div>
+
+    <footer class="footer">
+      <a href="#" id="options-link" class="footer-link">Settings</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

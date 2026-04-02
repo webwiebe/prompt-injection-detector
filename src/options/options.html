@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="options.css">
+  <title>Prompt Injection Detector - Settings</title>
+</head>
+<body>
+  <div class="options-container">
+    <h1>Prompt Injection Detector</h1>
+    <p class="subtitle">Configure detection sensitivity and behavior</p>
+
+    <section class="section">
+      <h2>Detection Sensitivity</h2>
+      <p class="section-desc">Controls the minimum severity level that triggers alerts.</p>
+      <div class="radio-group">
+        <label class="radio">
+          <input type="radio" name="sensitivity" value="low">
+          <span><strong>Low</strong> — Show all findings including minor ones</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="sensitivity" value="medium" checked>
+          <span><strong>Medium</strong> — Show medium severity and above (recommended)</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="sensitivity" value="high">
+          <span><strong>High</strong> — Only show high and critical findings</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Display</h2>
+      <label class="toggle">
+        <input type="checkbox" id="highlights-enabled" checked>
+        <span>Show page overlay highlights on detected elements</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="ai-warning-enabled">
+        <span>Inject AI agent warning banner on pages with detections</span>
+      </label>
+      <label class="toggle">
+        <input type="checkbox" id="ignore-legitimate-joiners" checked>
+        <span>Ignore zero-width joiners in Arabic/Indic/RTL pages (reduces false positives)</span>
+      </label>
+    </section>
+
+    <section class="section">
+      <h2>Domain Allowlist</h2>
+      <p class="section-desc">Domains where scanning is skipped entirely (one per line).</p>
+      <textarea id="allowlisted-domains" rows="5" placeholder="example.com&#10;trusted-site.org"></textarea>
+    </section>
+
+    <div class="actions">
+      <button id="save-btn" class="btn btn-primary">Save</button>
+      <span id="save-status" class="save-status"></span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

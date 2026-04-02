@@ -1,0 +1,17 @@
+{
+  "name": "prompt-injection-detector",
+  "version": "1.0.0",
+  "description": "Browser extension that detects prompt injection techniques on web pages",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:chrome": "node build.mjs --chrome",
+    "build:firefox": "node build.mjs --firefox",
+    "lint:firefox": "cd dist/firefox && web-ext lint",
+    "test": "node --test test/"
+  },
+  "devDependencies": {
+    "web-ext": "^8.4.0"
+  }
+}

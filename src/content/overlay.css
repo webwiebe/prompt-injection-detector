@@ -1,0 +1,16 @@
+/*
+ * Overlay styles injected via content_scripts.
+ * Minimal — most styling lives inside the Shadow DOM (see overlay.js).
+ * This file ensures the host element doesn't interfere with page layout.
+ */
+
+#pid-overlay-root {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: visible !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test: Invisible Unicode Characters</title>
+</head>
+<body>
+  <h1>Invisible Unicode Test Page</h1>
+
+  <!-- Zero-width space -->
+  <p id="zwsp">Hello&#x200B;World</p>
+
+  <!-- Zero-width non-joiner -->
+  <p id="zwnj">Test&#x200C;text</p>
+
+  <!-- Zero-width joiner -->
+  <p id="zwj">Some&#x200D;content</p>
+
+  <!-- BOM / ZWNBSP -->
+  <p id="bom">Data&#xFEFF;here</p>
+
+  <!-- Soft hyphen -->
+  <p id="shy">Word&#x00AD;break</p>
+
+  <!-- LTR/RTL marks -->
+  <p id="ltr">English&#x200E;text</p>
+  <p id="rtl">Right&#x200F;to left</p>
+
+  <!-- Multiple invisible chars concentrated -->
+  <p id="concentrated">A&#x200B;B&#x200B;C&#x200B;D&#x200B;E&#x200B;F&#x200B;G&#x200B;H&#x200B;I&#x200B;J&#x200B;K</p>
+
+  <!-- Unicode tag characters (the most dangerous) -->
+  <!-- U+E0069 = 'i', U+E0067 = 'g', U+E006E = 'n', etc. -->
+  <!-- Encoding "ignore" in tag chars: U+E0069 U+E0067 U+E006E U+E006F U+E0072 U+E0065 -->
+  <p id="tag-chars">Normal text&#xE0069;&#xE0067;&#xE006E;&#xE006F;&#xE0072;&#xE0065; more text</p>
+
+  <!-- Clean paragraph (no invisible chars) -->
+  <p id="clean">This is completely normal text with no hidden characters.</p>
+
+  <!-- Arabic text with legitimate ZWNJ usage -->
+  <p id="arabic" lang="ar">&#x200C;Arabic text with legitimate joiner</p>
+</body>
+</html>
