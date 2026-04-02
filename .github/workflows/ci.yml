@@ -6,14 +6,10 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  HOME: /Users/wiebe
-  PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
-
 jobs:
   lint:
     name: Lint
-    runs-on: mac-mini
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +48,6 @@ jobs:
               echo "::error::Missing $f"
               exit 1
             fi
-            # Basic check for doctype and closing tags
             if ! head -1 "$f" | grep -qi doctype; then
               echo "::error::$f missing DOCTYPE"
               exit 1
@@ -62,7 +57,7 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: mac-mini
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -71,7 +66,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: mac-mini
+    runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +120,7 @@ jobs:
 
   e2e:
     name: E2E Tests
-    runs-on: mac-mini
+    runs-on: ubuntu-latest
     needs: [build]
     steps:
       - uses: actions/checkout@v4
@@ -134,13 +129,13 @@ jobs:
         run: npm install --ignore-scripts
 
       - name: Install Playwright Chromium
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Build extension
         run: node build.mjs --chrome
 
       - name: Run E2E tests
-        run: npx playwright test
+        run: xvfb-run npx playwright test
 
       - name: Upload test report
         if: failure()
