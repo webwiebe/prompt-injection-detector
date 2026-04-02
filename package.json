@@ -9,9 +9,12 @@
     "build:chrome": "node build.mjs --chrome",
     "build:firefox": "node build.mjs --firefox",
     "lint:firefox": "cd dist/firefox && web-ext lint",
-    "test": "node --test test/"
+    "test": "node --test test/scanner.test.js test/threat-model.test.js",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed"
   },
   "devDependencies": {
+    "@playwright/test": "^1.50.0",
     "web-ext": "^8.4.0"
   }
 }
