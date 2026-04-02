@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+env:
+  HOME: /Users/wiebe
+  PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+jobs:
+  test:
+    name: Test
+    runs-on: mac-mini
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: node --test test/
+
+  release:
+    name: Build & Release
+    runs-on: mac-mini
+    needs: [test]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set version in manifest
+        run: |
+          node -e "
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('src/manifest.json','utf-8'));
+            m.version = '${{ steps.version.outputs.version }}';
+            fs.writeFileSync('src/manifest.json', JSON.stringify(m, null, 2) + '\n');
+          "
+
+      - name: Build
+        run: node build.mjs
+
+      - name: Package Chrome extension
+        run: cd dist/chrome && zip -r ../../prompt-injection-detector-${{ steps.version.outputs.version }}-chrome.zip .
+
+      - name: Package Firefox extension
+        run: cd dist/firefox && zip -r ../../prompt-injection-detector-${{ steps.version.outputs.version }}-firefox.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            prompt-injection-detector-${{ steps.version.outputs.version }}-chrome.zip
+            prompt-injection-detector-${{ steps.version.outputs.version }}-firefox.zip
+
+      - name: Upload to S3 (MinIO)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_ENDPOINT_URL: ${{ secrets.MINIO_ENDPOINT }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUCKET="webwiebe-apt-repository"
+          PREFIX="extensions/prompt-injection-detector"
+
+          # Upload versioned artifacts
+          aws s3 cp "prompt-injection-detector-${VERSION}-chrome.zip" \
+            "s3://${BUCKET}/${PREFIX}/${VERSION}/chrome.zip" \
+            --cache-control "max-age=86400"
+
+          aws s3 cp "prompt-injection-detector-${VERSION}-firefox.zip" \
+            "s3://${BUCKET}/${PREFIX}/${VERSION}/firefox.zip" \
+            --cache-control "max-age=86400"
+
+          # Update latest symlink
+          aws s3 cp "prompt-injection-detector-${VERSION}-chrome.zip" \
+            "s3://${BUCKET}/${PREFIX}/latest/chrome.zip" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+          aws s3 cp "prompt-injection-detector-${VERSION}-firefox.zip" \
+            "s3://${BUCKET}/${PREFIX}/latest/firefox.zip" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+          echo "Uploaded to s3://${BUCKET}/${PREFIX}/${VERSION}/"
+          echo "Latest updated at s3://${BUCKET}/${PREFIX}/latest/"

@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  HOME: /Users/wiebe
+  PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: mac-mini
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check JavaScript syntax
+        run: |
+          errors=0
+          for f in $(find src -name '*.js'); do
+            if ! node --check "$f" 2>&1; then
+              errors=$((errors + 1))
+            fi
+          done
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors file(s) have syntax errors"
+            exit 1
+          fi
+          echo "All JS files pass syntax check"
+
+      - name: Check JSON validity
+        run: node -e "JSON.parse(require('fs').readFileSync('src/manifest.json','utf-8')); console.log('manifest.json is valid')"
+
+      - name: Validate manifest structure
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('src/manifest.json','utf-8'));
+            const required = ['manifest_version','name','version','permissions','action','background','content_scripts'];
+            const missing = required.filter(k => !(k in m));
+            if (missing.length) { console.error('Missing keys:', missing); process.exit(1); }
+            if (m.manifest_version !== 3) { console.error('Must be MV3'); process.exit(1); }
+            console.log('Manifest structure valid (MV3)');
+          "
+
+  test:
+    name: Unit Tests
+    runs-on: mac-mini
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: node --test test/
+
+  build:
+    name: Build
+    runs-on: mac-mini
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Chrome extension
+        run: node build.mjs --chrome
+
+      - name: Build Firefox extension
+        run: node build.mjs --firefox
+
+      - name: Verify Chrome build output
+        run: |
+          for f in manifest.json background/service-worker.js content/main.js content/scanner.js popup/popup.html; do
+            if [ ! -f "dist/chrome/$f" ]; then
+              echo "::error::Missing dist/chrome/$f"
+              exit 1
+            fi
+          done
+          echo "Chrome build verified"
+
+      - name: Verify Firefox build output
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('dist/firefox/manifest.json','utf-8'));
+            if (!m.browser_specific_settings?.gecko?.id) {
+              console.error('Firefox manifest missing gecko settings');
+              process.exit(1);
+            }
+            console.log('Firefox manifest verified');
+          "
+
+      - name: Package Chrome extension
+        run: cd dist/chrome && zip -r ../../prompt-injection-detector-chrome.zip .
+
+      - name: Package Firefox extension
+        run: cd dist/firefox && zip -r ../../prompt-injection-detector-firefox.zip .
+
+      - name: Upload Chrome artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension
+          path: prompt-injection-detector-chrome.zip
+          retention-days: 30
+
+      - name: Upload Firefox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-extension
+          path: prompt-injection-detector-firefox.zip
+          retention-days: 30
