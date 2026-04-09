@@ -1,3 +1,5 @@
+[![PID](http://tamagotchi.nijmegen.wiebe.xyz/api/v1/pets/webwiebe/prompt-injection-detector/badge.svg)](http://tamagotchi.nijmegen.wiebe.xyz/pet/webwiebe/prompt-injection-detector)
+
 # Prompt Injection Detector
 
 Browser extension (Chrome + Firefox) that detects prompt injection techniques hidden on web pages — invisible Unicode characters, CSS-hidden content, and suspicious HTML patterns.
